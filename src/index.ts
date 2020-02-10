@@ -1,11 +1,4 @@
 import babel, { NodePath, PluginObj } from '@babel/core';
-import {
-    ClassDeclaration,
-    ClassMethod,
-    ClassProperty,
-    Identifier,
-    ImportDeclaration,
-} from '@babel/types';
 import * as Node from '@babel/types';
 import { dirname, resolve } from 'path';
 
@@ -30,19 +23,17 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
             : (file: string): boolean => (options.test as RegExp).test(file);
 
     let inLitElementDeclaration = '';
-    let localCssImportSpecifier: Identifier | undefined;
+    let localCssImportSpecifier: Node.Identifier | undefined;
     const styles = new Map();
 
-    function importDeclarationExit(path: NodePath<ImportDeclaration>, state: any) {
+    function importDeclarationExit(path: NodePath<Node.ImportDeclaration>, state: any) {
         const filepath = resolve(dirname(state.file.opts.filename), path.node.source.value);
         if (!testFilepath(filepath)) {
             return;
         }
-        const defaultImportName = new Object(
-            new Object(
-                path.node.specifiers.find(specifier => specifier.type === 'ImportDefaultSpecifier'),
-            ).local,
-        ).name;
+        const defaultImportName = path.node.specifiers.find(
+            specifier => specifier.type === 'ImportDefaultSpecifier',
+        )?.local?.name;
         if (!defaultImportName) {
             return;
         }
@@ -67,7 +58,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
         styles.set(defaultImportName, style);
     }
 
-    function classDeclaration(path: NodePath<ClassDeclaration>) {
+    function classDeclaration(path: NodePath<Node.ClassDeclaration>) {
         if (t.isIdentifier(path.node.superClass, { name: 'LitElement' })) {
             inLitElementDeclaration = path.node.id.name;
             path.traverse({ ClassBody: classBody });
@@ -82,17 +73,10 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
         if (!inLitElementDeclaration) {
             return;
         }
-        const classPropertyNodePath = path.find(p => {
-            let result = false;
-            if (t.isClassBody(p.node)) {
-                const body = p.node.body;
-                const node = body.find(
-                    x =>
-                        t.isClassProperty(x, { static: true }) &&
-                        t.isIdentifier(x.key, { name: 'styles' }),
-                );
-                result = Boolean(node);
-            }
+        const classPropertyNodePath = path.get('body').find(p => {
+            let result =
+                t.isClassProperty(p.node, { static: true }) &&
+                t.isIdentifier(p.node.key, { name: 'styles' });
             return result;
         });
         if (classPropertyNodePath) {
@@ -100,7 +84,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
         }
     }
 
-    function classMethod(path: NodePath<ClassMethod>) {
+    function classMethod(path: NodePath<Node.ClassMethod>) {
         if (
             t.isClassMethod(path.node, { static: true }) &&
             t.isIdentifier(path.node.key, { name: 'styles' })
@@ -109,7 +93,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
         }
     }
 
-    function replaceStyleIdentifier(path: NodePath<Identifier>) {
+    function replaceStyleIdentifier(path: NodePath<Node.Identifier>) {
         if (!localCssImportSpecifier) {
             throw new Error('localCssImportSpecifier is undefined');
         }
