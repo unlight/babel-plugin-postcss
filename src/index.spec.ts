@@ -22,7 +22,6 @@ it('get styles single', () => {
     };
     const result = run(
         stripIndents`
-        import { customElement, LitElement } from 'lit-element';
         import style from './my-element.css';
 
         class MyElement extends LitElement {
@@ -60,7 +59,6 @@ it('get styles array', () => {
     };
     const result = run(
         stripIndents`
-        import { customElement, LitElement } from 'lit-element';
         import style1 from './p1.css';
         import style2 from './p2.css';
 
@@ -78,7 +76,6 @@ it('get styles array', () => {
 it('styles static property loose', () => {
     const result = run(
         stripIndents`
-        import { customElement, LitElement } from 'lit-element';
         import style from './style.css';
         class MyElement extends LitElement {
             static styles = style;
@@ -96,7 +93,6 @@ it('styles static property loose', () => {
 it('styles static property loose array', () => {
     const result = run(
         stripIndents`
-        import { customElement, LitElement } from 'lit-element';
         import style from './style.css';
         class MyElement extends LitElement {
             static styles = [style];
@@ -114,7 +110,6 @@ it('styles static property loose array', () => {
 it('styles static property strict', () => {
     const result = run(
         stripIndents`
-        import { customElement, LitElement } from 'lit-element';
         import style from './style.css';
         class MyElement extends LitElement {
             static styles = style;
@@ -130,7 +125,6 @@ it('styles static property strict', () => {
 it('styles static property strict array', () => {
     const result = run(
         stripIndents`
-        import { customElement, LitElement } from 'lit-element';
         import style from './style.css';
         class MyElement extends LitElement {
             static styles = [style];
@@ -141,4 +135,19 @@ it('styles static property strict array', () => {
         ['@babel/plugin-proposal-class-properties', { loose: false }],
     );
     expect(result).toContain('_defineProperty(MyElement, "styles", [_css`:host {}`]);');
+});
+
+it('side effect import', () => {
+    const result = run(
+        stripIndents`
+        import './style.css';
+        class MyElement extends LitElement {
+            static styles = style;
+        }`,
+        {
+            readFileSync: () => 'a {}',
+        },
+        ['@babel/plugin-proposal-class-properties', { loose: false }],
+    );
+    expect(result).toContain(`import './style.css';`);
 });
