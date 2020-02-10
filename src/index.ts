@@ -59,7 +59,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
     }
 
     function classDeclaration(path: NodePath<Node.ClassDeclaration>) {
-        if (t.isIdentifier(path.node.superClass, { name: 'LitElement' })) {
+        if (t.isIdentifier(path.node.superClass, { name: 'LitElement' }) && styles.size > 0) {
             inLitElementDeclaration = path.node.id.name;
             path.traverse({ ClassBody: classBody });
         }
@@ -74,10 +74,10 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
             return;
         }
         const classPropertyNodePath = path.get('body').find(p => {
-            let result =
+            return (
                 t.isClassProperty(p.node, { static: true }) &&
-                t.isIdentifier(p.node.key, { name: 'styles' });
-            return result;
+                t.isIdentifier(p.node.key, { name: 'styles' })
+            );
         });
         if (classPropertyNodePath) {
             classPropertyNodePath.traverse({ Identifier: replaceStyleIdentifier });
@@ -86,6 +86,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
 
     function classMethod(path: NodePath<Node.ClassMethod>) {
         if (
+            inLitElementDeclaration &&
             t.isClassMethod(path.node, { static: true }) &&
             t.isIdentifier(path.node.key, { name: 'styles' })
         ) {
