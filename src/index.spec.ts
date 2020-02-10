@@ -1,5 +1,4 @@
 import { transform } from '@babel/core';
-import pluginProposalClassProperties from '@babel/plugin-proposal-class-properties';
 import { stripIndents } from 'common-tags';
 
 import plugin, { PluginOptions } from '.';
