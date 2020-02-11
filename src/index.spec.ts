@@ -17,137 +17,67 @@ it('smoke', () => {
 });
 
 it('get styles single', () => {
-    const options = {
-        readFileSync: () => 'h1 {}',
-    };
     const result = run(
         stripIndents`
-        import style from './my-element.css';
-
-        class MyElement extends LitElement {
-            static get styles() {
-                return style;
-            }
-        }`,
-        options,
+        import style from 'style.css';
+        `,
+        {
+            readFileSync: () => 'a {}',
+        },
     );
-    expect(result).not.toContain(`import style from './my-element.css'`);
-    expect(result).toContain('return _css`h1 {}`');
+    expect(result).not.toContain(`import style from 'style.css'`);
+    expect(result).toContain('var style = "a {}";');
 });
 
 it('styles with postcss option', () => {
     const result = run(
         stripIndents`
-        import style from './style.css';
-        class MyElement extends LitElement {
-            static styles = style;
-        }`,
+        import style from 'style.css';
+        `,
         {
             readFileSync: () => 'a { top: center }',
             postcss: true,
         },
-        ['@babel/plugin-proposal-class-properties', { loose: true }],
     );
     expect(result).toContain(
-        'MyElement.styles = _css`a { position: absolute; top: 50%; transform: translateY(-50%) }`',
+        `var style = "a { position: absolute; top: 50%; transform: translateY(-50%) }";`,
     );
 });
 
 it('get styles array', () => {
-    const options = {
-        readFileSync: (file: string) => `.${file.slice(-6, -4)} {}`,
-    };
     const result = run(
         stripIndents`
-        import style1 from './p1.css';
-        import style2 from './p2.css';
-
-        class MyElement extends LitElement {
-            static get styles() {
-                return [style1, style2];
-            }
-        }`,
-        options,
-    );
-    expect(result).toContain('return [_css`.p1 {}`, _css`.p2 {}`');
-    expect(result).not.toContain(`import style2 from './p2.css'`);
-});
-
-it('styles static property loose', () => {
-    const result = run(
-        stripIndents`
-        import style from './style.css';
-        class MyElement extends LitElement {
-            static styles = style;
-        }`,
+        import style1 from 'p1.css';
+        import style2 from 'p2.css';
+        `,
         {
-            readFileSync: () => ':host {}',
+            readFileSync: (file: string) => `.${file.slice(-6, -4)} {}`,
         },
-        ['@babel/plugin-proposal-class-properties', { loose: true }],
     );
-    expect(result).toContain(stripIndents`
-        MyElement.styles = _css\`:host {}\`;
-    `);
-});
-
-it('styles static property loose array', () => {
-    const result = run(
-        stripIndents`
-        import style from './style.css';
-        class MyElement extends LitElement {
-            static styles = [style];
-        }`,
-        {
-            readFileSync: () => ':host {}',
-        },
-        ['@babel/plugin-proposal-class-properties', { loose: true }],
-    );
-    expect(result).toContain(stripIndents`
-        MyElement.styles = [_css\`:host {}\`];
-    `);
-});
-
-it('styles static property strict', () => {
-    const result = run(
-        stripIndents`
-        import style from './style.css';
-        class MyElement extends LitElement {
-            static styles = style;
-        }`,
-        {
-            readFileSync: () => ':host {}',
-        },
-        ['@babel/plugin-proposal-class-properties', { loose: false }],
-    );
-    expect(result).toContain('_defineProperty(MyElement, "styles", _css`:host {}`);');
-});
-
-it('styles static property strict array', () => {
-    const result = run(
-        stripIndents`
-        import style from './style.css';
-        class MyElement extends LitElement {
-            static styles = [style];
-        }`,
-        {
-            readFileSync: () => ':host {}',
-        },
-        ['@babel/plugin-proposal-class-properties', { loose: false }],
-    );
-    expect(result).toContain('_defineProperty(MyElement, "styles", [_css`:host {}`]);');
+    expect(result).toContain('var style1 = ".p1 {}');
+    expect(result).toContain('var style2 = ".p2 {}');
 });
 
 it('side effect import', () => {
     const result = run(
         stripIndents`
-        import './style.css';
-        class MyElement extends LitElement {
-            static styles = style;
-        }`,
+        import 'style.css';
+        `,
         {
             readFileSync: () => 'a {}',
         },
-        ['@babel/plugin-proposal-class-properties', { loose: false }],
     );
-    expect(result).toContain(`import './style.css';`);
+    expect(result).toContain(`import 'style.css';`);
+});
+
+it('unknow file should be touched', () => {
+    const result = run(
+        stripIndents`
+        import style from 'style.vue';
+        `,
+        {
+            readFileSync: () => 'a {}',
+        },
+    );
+    expect(result).toContain(`import style from 'style.vue'`);
 });

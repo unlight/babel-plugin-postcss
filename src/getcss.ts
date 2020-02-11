@@ -7,7 +7,7 @@ type GetCssOptions = {
     postcss: string | boolean | undefined;
 };
 
-export function getCss(options: GetCssOptions) {
+export function getCss(options: GetCssOptions): string {
     const { filepath, postcss, readFileSync = fs.readFileSync } = options;
     let result = readFileSync(filepath, { encoding: 'utf8' });
     if (postcss) {
