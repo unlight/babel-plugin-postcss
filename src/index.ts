@@ -57,7 +57,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
             );
             variableDeclaratorInit = t.taggedTemplateExpression(
                 t.identifier(localCssImportSpecifier.name),
-                t.templateLiteral([t.templateElement({ raw: cssContent })], []),
+                t.templateLiteral([t.templateElement({ raw: cssContent, cooked: cssContent })], []),
             );
         } else {
             variableDeclaratorInit = t.stringLiteral(cssContent);
