@@ -1,14 +1,13 @@
 {
-  "name": "babel-plugin-lit-element-css",
+  "name": "babel-plugin-postcss",
   "version": "0.0.0-dev",
   "license": "MIT",
-  "description": "Replace import from css expression to lit-element's css tag function",
+  "description": "Replace import from css by content transformed by postcss",
   "main": "index.js",
   "typings": "index.d.ts",
   "author": "2020",
   "keywords": [
-    "babel-plugin",
-    "lit-element"
+    "babel-plugin"
   ],
   "engines": {
     "node": ">=8"
@@ -95,10 +94,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unlight/babel-plugin-lit-element-css.git"
+    "url": "git+https://github.com/unlight/babel-plugin-postcss.git"
   },
   "bugs": {
-    "url": "https://github.com/unlight/babel-plugin-lit-element-css/issues"
+    "url": "https://github.com/unlight/babel-plugin-postcss/issues"
   },
-  "homepage": "https://github.com/unlight/babel-plugin-lit-element-css#readme"
+  "homepage": "https://github.com/unlight/babel-plugin-postcss#readme"
 }

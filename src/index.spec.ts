@@ -81,3 +81,21 @@ it('unknow file should be touched', () => {
     );
     expect(result).toContain(`import style from 'style.vue'`);
 });
+
+it('tagged template expression', () => {
+    const result = run(
+        stripIndents`
+        import style from 'style.css';
+        `,
+        {
+            readFileSync: () => 'a {}',
+            tagged: ['css', 'lit-element'],
+        },
+    );
+    expect(result).toContain('import { css as _css } from "lit-element"');
+    expect(result).toContain('var style = _css`a {}`');
+    expect(result).toContain(stripIndents`
+        import { css as _css } from "lit-element";
+        var style = _css\`a {}\`;
+    `);
+});

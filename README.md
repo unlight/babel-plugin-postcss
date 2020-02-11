@@ -1,6 +1,4 @@
-# babel-plugin-lit-element-css
-
-Replace import from css expression to lit-element's css tag function
+# babel-plugin-postcss
 
 Input:
 
@@ -31,5 +29,5 @@ export class MyElement extends LitElement {
 ## Install
 
 ```sh
-npm install --save-dev babel-plugin-lit-element-css
+npm install --save-dev babel-plugin-postcss
 ```
