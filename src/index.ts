@@ -8,6 +8,7 @@ const defaultOptions = {
     test: (() => false) as RegExp | Function,
     readFileSync: undefined as Function | undefined,
     postcss: undefined as undefined | string | boolean,
+    tagged: undefined as undefined | [string, string],
 };
 
 export type PluginOptions = typeof defaultOptions;
@@ -29,7 +30,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
         if (!testFilepath(filepath)) {
             return;
         }
-        const defaultImportName = path.node.specifiers.find(
+        const defaultImportName: string | undefined = path.node.specifiers.find(
             specifier => specifier.type === 'ImportDefaultSpecifier',
         )?.local?.name;
         if (!defaultImportName) {
@@ -40,25 +41,32 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
             readFileSync: options.readFileSync,
             postcss: options.postcss,
         });
+        let variableDeclaratorInit: Node.Expression | undefined;
+        if (options.tagged) {
+            const [taggedLocalImport, taggedImportModule] = options.tagged;
+            if (!localCssImportSpecifier) {
+                localCssImportSpecifier = path.scope.generateUidIdentifierBasedOnNode(
+                    t.identifier(taggedLocalImport),
+                );
+            }
+            path.insertBefore(
+                t.importDeclaration(
+                    [t.importSpecifier(localCssImportSpecifier, t.identifier(taggedLocalImport))],
+                    t.stringLiteral(taggedImportModule),
+                ),
+            );
+            variableDeclaratorInit = t.taggedTemplateExpression(
+                t.identifier(localCssImportSpecifier.name),
+                t.templateLiteral([t.templateElement({ raw: cssContent })], []),
+            );
+        } else {
+            variableDeclaratorInit = t.stringLiteral(cssContent);
+        }
         path.replaceWith(
             t.variableDeclaration('var', [
-                t.variableDeclarator(t.identifier(defaultImportName), t.stringLiteral(cssContent)),
+                t.variableDeclarator(t.identifier(defaultImportName), variableDeclaratorInit),
             ]),
         );
-    }
-
-    function replaceStyleIdentifier(path: NodePath<Node.Identifier>) {
-        // if (!localCssImportSpecifier) {
-        //     throw new Error('localCssImportSpecifier is undefined');
-        // }
-        // if (path.isReferencedIdentifier() && styles.has(path.node.name)) {
-        //     path.replaceWith(
-        //         t.taggedTemplateExpression(
-        //             t.identifier(localCssImportSpecifier.name),
-        //             t.templateLiteral([t.templateElement({ raw: styles.get(path.node.name) })], []),
-        //         ),
-        //     );
-        // }
     }
 
     function programExit() {
