@@ -24,7 +24,6 @@ module.exports = {
         'unicorn',
         'import',
         'wix-editor',
-        '@typescript-eslint/tslint',
         'prettier',
         'simple-import-sort',
         'promise',
@@ -72,24 +71,16 @@ module.exports = {
         'prettier/prettier': [1, { endOfLine: 'auto' }],
         'sort-imports': 'off',
         'import/order': 'off',
-        // tslint
         '@typescript-eslint/no-use-before-define': 0,
         '@typescript-eslint/no-floating-promises': 1,
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/ban-ts-ignore': 0,
-        '@typescript-eslint/no-unnecessary-condition': [1, { ignoreRhs: true }],
-        '@typescript-eslint/tslint/config': [
-            1,
-            {
-                lintFile: './tslint.json',
-            },
-        ],
+        '@typescript-eslint/no-unnecessary-condition': 1,
     },
     overrides: [
         {
             files: ['*.spec.ts', '**/testing/**/*.ts'],
             rules: {
-                '@typescript-eslint/tslint/config': 0,
                 'consistent-return': 0,
                 'max-lines': 0,
                 '@typescript-eslint/no-explicit-any': 0,

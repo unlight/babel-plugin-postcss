@@ -1,5 +1,6 @@
 import { transform } from '@babel/core';
 import { stripIndents } from 'common-tags';
+import { expect } from 'earljs';
 
 import plugin, { PluginOptions } from '.';
 
@@ -25,8 +26,8 @@ it('get styles single', () => {
             readFileSync: () => 'a {}',
         },
     );
-    expect(result).not.toContain(`import style from 'style.css'`);
-    expect(result).toContain('var style = "a {}";');
+    expect(result).not.toEqual(expect.stringMatching(`import style from 'style.css'`));
+    expect(result).toEqual(expect.stringMatching('var style = "a {}";'));
 });
 
 it('styles with postcss option', () => {
@@ -39,7 +40,7 @@ it('styles with postcss option', () => {
             postcss: true,
         },
     );
-    expect(result).toContain(
+    expect(result).toEqual(
         `var style = "a { position: absolute; top: 50%; transform: translateY(-50%) }";`,
     );
 });
@@ -54,8 +55,8 @@ it('get styles array', () => {
             readFileSync: (file: string) => `.${file.slice(-6, -4)} {}`,
         },
     );
-    expect(result).toContain('var style1 = ".p1 {}');
-    expect(result).toContain('var style2 = ".p2 {}');
+    expect(result).toEqual(expect.stringMatching('var style1 = ".p1 {}'));
+    expect(result).toEqual(expect.stringMatching('var style2 = ".p2 {}'));
 });
 
 it('side effect import', () => {
@@ -67,7 +68,7 @@ it('side effect import', () => {
             readFileSync: () => 'a {}',
         },
     );
-    expect(result).toContain(`import 'style.css';`);
+    expect(result).toEqual(expect.stringMatching(`import 'style.css';`));
 });
 
 it('unknow file should be touched', () => {
@@ -79,7 +80,7 @@ it('unknow file should be touched', () => {
             readFileSync: () => 'a {}',
         },
     );
-    expect(result).toContain(`import style from 'style.vue'`);
+    expect(result).toEqual(expect.stringMatching(`import style from 'style.vue'`));
 });
 
 it('tagged template expression', () => {
@@ -92,10 +93,12 @@ it('tagged template expression', () => {
             tagged: ['css', 'lit-element'],
         },
     );
-    expect(result).toContain('import { css as _css } from "lit-element"');
-    expect(result).toContain('var style = _css`a {}`');
-    expect(result).toContain(stripIndents`
+    expect(result).toEqual(expect.stringMatching('import { css as _css } from "lit-element"'));
+    expect(result).toEqual(expect.stringMatching('var style = _css`a {}`'));
+    expect(result).toEqual(
+        expect.stringMatching(stripIndents`
         import { css as _css } from "lit-element";
         var style = _css\`a {}\`;
-    `);
+    `),
+    );
 });

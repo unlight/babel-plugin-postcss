@@ -53,4 +53,12 @@ commit_lint() {
     commitlint --from $from
 }
 
+commit_msg() {
+    if git-branch-is -q -r "^(master)"; then
+        commitlint -E HUSKY_GIT_PARAMS
+    else
+        true
+    fi
+}
+
 "$@"

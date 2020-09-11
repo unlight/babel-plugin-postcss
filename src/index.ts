@@ -16,7 +16,7 @@ export type PluginOptions = typeof defaultOptions;
 /**
  * https://github.com/jamiebuilds/babel-handbook/blob/master/translations/en/plugin-handbook.md#writing-your-first-babel-plugin
  */
-export default function({ types: t }: typeof babel, options: PluginOptions): PluginObj {
+export default function ({ types: t }: typeof babel, options: PluginOptions): PluginObj {
     options = { ...defaultOptions, ...options };
     const testFilepath =
         typeof options.test === 'function'
@@ -31,7 +31,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
             return;
         }
         const defaultImportName: string | undefined = path.node.specifiers.find(
-            specifier => specifier.type === 'ImportDefaultSpecifier',
+            (specifier) => specifier.type === 'ImportDefaultSpecifier',
         )?.local?.name;
         if (!defaultImportName) {
             return;
@@ -56,7 +56,7 @@ export default function({ types: t }: typeof babel, options: PluginOptions): Plu
                 ),
             );
             variableDeclaratorInit = t.taggedTemplateExpression(
-                t.identifier(localCssImportSpecifier.name),
+                t.identifier(localCssImportSpecifier!.name),
                 t.templateLiteral([t.templateElement({ raw: cssContent, cooked: cssContent })], []),
             );
         } else {
