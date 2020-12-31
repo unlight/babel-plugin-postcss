@@ -63,7 +63,7 @@ export default function ({ types: t }: typeof babel, options: PluginOptions): Pl
             variableDeclaratorInit = t.stringLiteral(cssContent);
         }
         path.replaceWith(
-            t.variableDeclaration('var', [
+            t.variableDeclaration('const', [
                 t.variableDeclarator(t.identifier(defaultImportName), variableDeclaratorInit),
             ]),
         );
