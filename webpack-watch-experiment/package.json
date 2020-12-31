@@ -1,0 +1,21 @@
+{
+  "name": "webpack-watch-experiment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-loader": "^8.1.0",
+    "babel-plugin-postcss": "link:d:/Dev/babel-plugin-postcss/dist/",
+    "css-loader": "^4.3.0",
+    "lit-element": "^2.4.0",
+    "postcss-loader": "^4.0.1",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  }
+}
