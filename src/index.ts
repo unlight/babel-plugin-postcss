@@ -5,7 +5,7 @@ import { dirname, resolve } from 'path';
 import { getCss } from './getcss';
 
 const defaultOptions = {
-    test: (() => false) as RegExp | Function,
+    test: /\.css$/ as RegExp | Function,
     readFileSync: undefined as Function | undefined,
     postcss: undefined as undefined | string | boolean,
     tagged: undefined as undefined | [string, string],

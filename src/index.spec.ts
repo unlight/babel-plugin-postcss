@@ -7,7 +7,7 @@ import plugin, { PluginOptions } from '.';
 function run(source: string, options?: Partial<PluginOptions>, ...plugins_: any[]) {
     const { code } = transform(source, {
         filename: 'test.ts',
-        plugins: [[plugin, { test: /\.css$/, ...(options || {}) }], ...plugins_],
+        plugins: [[plugin, { ...(options || {}) }], ...plugins_],
     })!;
     return code;
 }
@@ -71,7 +71,7 @@ it('side effect import', () => {
     expect(result).toEqual(expect.stringMatching(`import 'style.css';`));
 });
 
-it('unknow file should be touched', () => {
+it('unknow file should not be touched', () => {
     const result = run(
         stripIndents`
         import style from 'style.vue';
@@ -81,6 +81,32 @@ it('unknow file should be touched', () => {
         },
     );
     expect(result).toEqual(expect.stringMatching(`import style from 'style.vue'`));
+});
+
+it('file with matched extension is transformed', () => {
+    const result = run(
+        stripIndents`
+        import style from 'style.pcss';
+        `,
+        {
+            readFileSync: () => 'a {}',
+            test: /\.p?css$/,
+        },
+    );
+    expect(result).toEqual(expect.stringMatching(`const style = "a {}";`));
+});
+
+it('function as test option is executed', () => {
+    const result = run(
+        stripIndents`
+        import style from 'style.pcss';
+        `,
+        {
+            readFileSync: () => 'a {}',
+            test: (file) => file.includes('.pcss'),
+        },
+    );
+    expect(result).toEqual(expect.stringMatching(`const style = "a {}";`));
 });
 
 it('tagged template expression', () => {

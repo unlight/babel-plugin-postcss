@@ -32,7 +32,7 @@ var style2 = css`
 
 Regular expression or function which test importee for being parsed as style file (css).  
 Type: `RegExp | Function`  
-Default: `() => false`  
+Default: `/\.css$/`  
 Example: `/\.css$/` only `.css` imports will be parsed
 
 #### postcss
