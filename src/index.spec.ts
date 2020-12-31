@@ -7,14 +7,14 @@ import plugin, { PluginOptions } from '.';
 function run(source: string, options?: Partial<PluginOptions>, ...plugins_: any[]) {
     const { code } = transform(source, {
         filename: 'test.ts',
-        plugins: [[plugin, { test: /\.css$/, ...(options || {}) }], ...plugins_],
+        plugins: [[plugin, { ...(options || {}) }], ...plugins_],
     })!;
     return code;
 }
 
 it('smoke', () => {
-    const result = run(`var foo = 1`);
-    expect(result).toEqual(`var foo = 1;`);
+    const result = run(`const foo = 1`);
+    expect(result).toEqual(`const foo = 1;`);
 });
 
 it('get styles single', () => {
@@ -27,7 +27,7 @@ it('get styles single', () => {
         },
     );
     expect(result).not.toEqual(expect.stringMatching(`import style from 'style.css'`));
-    expect(result).toEqual(expect.stringMatching('var style = "a {}";'));
+    expect(result).toEqual(expect.stringMatching('const style = "a {}";'));
 });
 
 it('styles with postcss option', () => {
@@ -41,7 +41,7 @@ it('styles with postcss option', () => {
         },
     );
     expect(result).toEqual(
-        `var style = "a { position: absolute; top: 50%; transform: translateY(-50%) }";`,
+        `const style = "a { position: absolute; top: 50%; transform: translateY(-50%) }";`,
     );
 });
 
@@ -55,8 +55,8 @@ it('get styles array', () => {
             readFileSync: (file: string) => `.${file.slice(-6, -4)} {}`,
         },
     );
-    expect(result).toEqual(expect.stringMatching('var style1 = ".p1 {}'));
-    expect(result).toEqual(expect.stringMatching('var style2 = ".p2 {}'));
+    expect(result).toEqual(expect.stringMatching('const style1 = ".p1 {}'));
+    expect(result).toEqual(expect.stringMatching('const style2 = ".p2 {}'));
 });
 
 it('side effect import', () => {
@@ -71,7 +71,7 @@ it('side effect import', () => {
     expect(result).toEqual(expect.stringMatching(`import 'style.css';`));
 });
 
-it('unknow file should be touched', () => {
+it('unknow file should not be touched', () => {
     const result = run(
         stripIndents`
         import style from 'style.vue';
@@ -81,6 +81,32 @@ it('unknow file should be touched', () => {
         },
     );
     expect(result).toEqual(expect.stringMatching(`import style from 'style.vue'`));
+});
+
+it('file with matched extension is transformed', () => {
+    const result = run(
+        stripIndents`
+        import style from 'style.pcss';
+        `,
+        {
+            readFileSync: () => 'a {}',
+            test: /\.p?css$/,
+        },
+    );
+    expect(result).toEqual(expect.stringMatching(`const style = "a {}";`));
+});
+
+it('function as test option is executed', () => {
+    const result = run(
+        stripIndents`
+        import style from 'style.pcss';
+        `,
+        {
+            readFileSync: () => 'a {}',
+            test: (file) => file.includes('.pcss'),
+        },
+    );
+    expect(result).toEqual(expect.stringMatching(`const style = "a {}";`));
 });
 
 it('tagged template expression', () => {
@@ -94,11 +120,11 @@ it('tagged template expression', () => {
         },
     );
     expect(result).toEqual(expect.stringMatching('import { css as _css } from "lit-element"'));
-    expect(result).toEqual(expect.stringMatching('var style = _css`a {}`'));
+    expect(result).toEqual(expect.stringMatching('const style = _css`a {}`'));
     expect(result).toEqual(
         expect.stringMatching(stripIndents`
         import { css as _css } from "lit-element";
-        var style = _css\`a {}\`;
+        const style = _css\`a {}\`;
     `),
     );
 });

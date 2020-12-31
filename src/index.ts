@@ -5,7 +5,7 @@ import { dirname, resolve } from 'path';
 import { getCss } from './getcss';
 
 const defaultOptions = {
-    test: (() => false) as RegExp | Function,
+    test: /\.css$/ as RegExp | Function,
     readFileSync: undefined as Function | undefined,
     postcss: undefined as undefined | string | boolean,
     tagged: undefined as undefined | [string, string],
@@ -63,7 +63,7 @@ export default function ({ types: t }: typeof babel, options: PluginOptions): Pl
             variableDeclaratorInit = t.stringLiteral(cssContent);
         }
         path.replaceWith(
-            t.variableDeclaration('var', [
+            t.variableDeclaration('const', [
                 t.variableDeclarator(t.identifier(defaultImportName), variableDeclaratorInit),
             ]),
         );
