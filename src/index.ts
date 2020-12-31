@@ -16,7 +16,10 @@ export type PluginOptions = typeof defaultOptions;
 /**
  * https://github.com/jamiebuilds/babel-handbook/blob/master/translations/en/plugin-handbook.md#writing-your-first-babel-plugin
  */
-export default function ({ types: t }: typeof babel, options: PluginOptions): PluginObj {
+export default function babelPluginPostcss(
+    { types: t }: typeof babel,
+    options: PluginOptions,
+): PluginObj {
     options = { ...defaultOptions, ...options };
     const testFilepath =
         typeof options.test === 'function'
@@ -26,12 +29,15 @@ export default function ({ types: t }: typeof babel, options: PluginOptions): Pl
     let localCssImportSpecifier: Node.Identifier | undefined;
 
     function importDeclarationExit(path: NodePath<Node.ImportDeclaration>, state: any) {
-        const filepath = resolve(dirname(state.file.opts.filename), path.node.source.value);
+        const filepath = resolve(
+            dirname(state.file.opts.filename),
+            path.node.source.value,
+        );
         if (!testFilepath(filepath)) {
             return;
         }
         const defaultImportName: string | undefined = path.node.specifiers.find(
-            (specifier) => specifier.type === 'ImportDefaultSpecifier',
+            specifier => specifier.type === 'ImportDefaultSpecifier',
         )?.local?.name;
         if (!defaultImportName) {
             return;
@@ -51,20 +57,31 @@ export default function ({ types: t }: typeof babel, options: PluginOptions): Pl
             }
             path.insertBefore(
                 t.importDeclaration(
-                    [t.importSpecifier(localCssImportSpecifier, t.identifier(taggedLocalImport))],
+                    [
+                        t.importSpecifier(
+                            localCssImportSpecifier,
+                            t.identifier(taggedLocalImport),
+                        ),
+                    ],
                     t.stringLiteral(taggedImportModule),
                 ),
             );
             variableDeclaratorInit = t.taggedTemplateExpression(
                 t.identifier(localCssImportSpecifier!.name),
-                t.templateLiteral([t.templateElement({ raw: cssContent, cooked: cssContent })], []),
+                t.templateLiteral(
+                    [t.templateElement({ raw: cssContent, cooked: cssContent })],
+                    [],
+                ),
             );
         } else {
             variableDeclaratorInit = t.stringLiteral(cssContent);
         }
         path.replaceWith(
             t.variableDeclaration('const', [
-                t.variableDeclarator(t.identifier(defaultImportName), variableDeclaratorInit),
+                t.variableDeclarator(
+                    t.identifier(defaultImportName),
+                    variableDeclaratorInit,
+                ),
             ]),
         );
     }

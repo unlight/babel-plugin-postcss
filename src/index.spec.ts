@@ -103,7 +103,7 @@ it('function as test option is executed', () => {
         `,
         {
             readFileSync: () => 'a {}',
-            test: (file) => file.includes('.pcss'),
+            test: file => file.includes('.pcss'),
         },
     );
     expect(result).toEqual(expect.stringMatching(`const style = "a {}";`));
@@ -119,7 +119,9 @@ it('tagged template expression', () => {
             tagged: ['css', 'lit-element'],
         },
     );
-    expect(result).toEqual(expect.stringMatching('import { css as _css } from "lit-element"'));
+    expect(result).toEqual(
+        expect.stringMatching('import { css as _css } from "lit-element"'),
+    );
     expect(result).toEqual(expect.stringMatching('const style = _css`a {}`'));
     expect(result).toEqual(
         expect.stringMatching(stripIndents`
