@@ -1,6 +1,6 @@
 import { transform } from '@babel/core';
 import { stripIndents } from 'common-tags';
-import { expect } from 'earljs';
+import expect from 'expect';
 
 import plugin, { PluginOptions } from '.';
 
@@ -130,3 +130,22 @@ it('tagged template expression', () => {
     `),
     );
 });
+
+it.only('external dependency', () => {
+    const result = run(
+        stripIndents`
+        import style from 'styles/a/b/style.css';
+        `,
+        {
+            readFileSync: () => 'a { }',
+            postcss: true,
+            externalDependencies: ['styles/**/*.css'],
+        },
+    );
+    console.log('result', result);
+    // expect(result).toEqual(
+    //     `const style = "a { position: absolute; top: 50%; transform: translateY(-50%) }";`,
+    // );
+});
+
+it('multiple external dependencies');

@@ -9,7 +9,6 @@ module.exports = {
         'plugin:@typescript-eslint/recommended',
         'plugin:unicorn/recommended',
         'plugin:promise/recommended',
-        'plugin:sonarjs/recommended',
     ],
     parser: '@typescript-eslint/parser',
     parserOptions: {
@@ -27,7 +26,6 @@ module.exports = {
         'prettier',
         'simple-import-sort',
         'promise',
-        'sonarjs',
         'only-warn',
     ],
     rules: {
@@ -88,7 +86,6 @@ module.exports = {
                 '@typescript-eslint/no-non-null-assertion': 0,
                 '@typescript-eslint/camelcase': 0,
                 'import/max-dependencies': 0,
-                'sonarjs/no-duplicate-string': 0,
             },
         },
     ],
