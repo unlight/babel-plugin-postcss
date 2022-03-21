@@ -2,72 +2,79 @@ import { transform } from '@babel/core';
 import { stripIndents } from 'common-tags';
 import expect from 'expect';
 
-import plugin, { PluginOptions } from '.';
+import { babelPluginPostcssFactory, PluginOptions, CreatePluginOptions } from '.';
 
-function run(source: string, options?: Partial<PluginOptions>, ...plugins_: any[]) {
+function run({
+    createOptions,
+    source,
+    options,
+    plugins,
+}: {
+    source: string;
+    createOptions?: Partial<CreatePluginOptions>;
+    options?: Partial<PluginOptions>;
+    plugins?: any[];
+}) {
+    const plugin = babelPluginPostcssFactory(createOptions);
     const { code } = transform(source, {
         filename: 'test.ts',
-        plugins: [[plugin, { ...(options || {}) }], ...plugins_],
+        plugins: [[plugin, { ...(options || {}) }], ...(plugins || [])],
     })!;
     return code;
 }
 
 it('smoke', () => {
-    const result = run(`const foo = 1`);
+    const result = run({
+        source: `const foo = 1`,
+    });
     expect(result).toEqual(`const foo = 1;`);
 });
 
 it('get styles single', () => {
-    const result = run(
-        stripIndents`
-        import style from 'style.css';
-        `,
-        {
-            readFileSync: () => 'a {}',
+    const result = run({
+        createOptions: {
+            readFile: () => 'a {}',
         },
-    );
+        source: stripIndents`import style from 'style.css';`,
+    });
     expect(result).not.toEqual(expect.stringMatching(`import style from 'style.css'`));
     expect(result).toEqual(expect.stringMatching('const style = "a {}";'));
 });
 
 it('styles with postcss option', () => {
-    const result = run(
-        stripIndents`
-        import style from 'style.css';
-        `,
-        {
-            readFileSync: () => 'a { top: center }',
-            postcss: true,
+    const result = run({
+        createOptions: {
+            readFile: () => 'a { top: center }',
         },
-    );
+        options: { postcss: true },
+        source: stripIndents`import style from 'style.css';`,
+    });
     expect(result).toEqual(
         `const style = "a { position: absolute; top: 50%; transform: translateY(-50%) }";`,
     );
 });
 
 it('get styles array', () => {
-    const result = run(
-        stripIndents`
+    const result = run({
+        source: stripIndents`
         import style1 from 'p1.css';
         import style2 from 'p2.css';
         `,
-        {
-            readFileSync: (file: string) => `.${file.slice(-6, -4)} {}`,
+        createOptions: {
+            readFile: (file: string) => `.${file.slice(-6, -4)} {}`,
         },
-    );
+    });
     expect(result).toEqual(expect.stringMatching('const style1 = ".p1 {}'));
     expect(result).toEqual(expect.stringMatching('const style2 = ".p2 {}'));
 });
 
 it('side effect import', () => {
-    const result = run(
-        stripIndents`
-        import 'style.css';
-        `,
-        {
-            readFileSync: () => 'a {}',
+    const result = run({
+        source: stripIndents`import 'style.css';`,
+        createOptions: {
+            readFile: () => 'a {}',
         },
-    );
+    });
     expect(result).toEqual(expect.stringMatching(`import 'style.css';`));
 });
 
@@ -131,7 +138,7 @@ it('tagged template expression', () => {
     );
 });
 
-it.only('external dependency', () => {
+it('external dependency', () => {
     const result = run(
         stripIndents`
         import style from 'styles/a/b/style.css';
