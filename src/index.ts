@@ -7,8 +7,9 @@ import { getCss } from './getcss';
 import fs from 'fs';
 
 export type CreatePluginOptions = {
-    readFile: Function | undefined;
+    readFile: Function;
     globFiles: (patterns: typeof defaultOptions.externalDependencies) => string[];
+    mtimeFile: Function;
 };
 export type PluginOptions = typeof defaultOptions;
 type Api = typeof babel & ConfigAPI & { addExternalDependency: (ref: string) => void };
@@ -26,8 +27,9 @@ export function babelPluginPostcssFactory(options: Partial<CreatePluginOptions> 
     const {
         globFiles = globby.sync as CreatePluginOptions['globFiles'],
         readFile = fs.readFileSync,
+        mtimeFile = file => fs.statSync(file).mtimeMs,
     } = options;
-    return babelPluginPostcss.bind(undefined, { globFiles, readFile });
+    return babelPluginPostcss.bind(undefined, { globFiles, readFile, mtimeFile });
 }
 
 /**
@@ -38,7 +40,7 @@ function babelPluginPostcss(
     { types: t, cache, addExternalDependency }: Api,
     options: PluginOptions,
 ) {
-    const { readFile, globFiles } = createOptions;
+    const { readFile, globFiles, mtimeFile } = createOptions;
     options = { ...defaultOptions, ...options };
     const testFilepath =
         typeof options.test === 'function'
@@ -47,10 +49,10 @@ function babelPluginPostcss(
     let localCssImportSpecifier: Node.Identifier | undefined;
     if (options.externalDependencies) {
         const files = globFiles(options.externalDependencies);
-        console.log('files', files);
-        // cache.invalidate(() => {
-        //     return cache.invalidate(() => statSync('index.css').mtimeMs);
-        // });
+        for (const file of files) {
+            addExternalDependency(file);
+            cache.invalidate(() => mtimeFile(file));
+        }
     }
 
     function importDeclarationExit(path: NodePath<Node.ImportDeclaration>, state: any) {

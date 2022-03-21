@@ -79,53 +79,51 @@ it('side effect import', () => {
 });
 
 it('unknow file should not be touched', () => {
-    const result = run(
-        stripIndents`
-        import style from 'style.vue';
-        `,
-        {
-            readFileSync: () => 'a {}',
+    const result = run({
+        source: stripIndents`import style from 'style.vue';`,
+        createOptions: {
+            readFile: () => 'a {}',
         },
-    );
+    });
     expect(result).toEqual(expect.stringMatching(`import style from 'style.vue'`));
 });
 
 it('file with matched extension is transformed', () => {
-    const result = run(
-        stripIndents`
-        import style from 'style.pcss';
-        `,
-        {
-            readFileSync: () => 'a {}',
+    const result = run({
+        source: stripIndents`import style from 'style.pcss';`,
+        createOptions: {
+            readFile: () => 'a {}',
+        },
+        options: {
             test: /\.p?css$/,
         },
-    );
+    });
     expect(result).toEqual(expect.stringMatching(`const style = "a {}";`));
 });
 
 it('function as test option is executed', () => {
-    const result = run(
-        stripIndents`
-        import style from 'style.pcss';
-        `,
-        {
-            readFileSync: () => 'a {}',
+    const result = run({
+        source: stripIndents`import style from 'style.pcss';`,
+        options: {
             test: file => file.includes('.pcss'),
         },
-    );
+        createOptions: {
+            readFile: () => 'a {}',
+        },
+    });
     expect(result).toEqual(expect.stringMatching(`const style = "a {}";`));
 });
 
 it('tagged template expression', () => {
-    const result = run(
-        stripIndents`
-        import style from 'style.css';
-        `,
-        {
-            readFileSync: () => 'a {}',
+    const result = run({
+        source: stripIndents`import style from 'style.css';`,
+        createOptions: {
+            readFile: () => 'a {}',
+        },
+        options: {
             tagged: ['css', 'lit-element'],
         },
-    );
+    });
     expect(result).toEqual(
         expect.stringMatching('import { css as _css } from "lit-element"'),
     );
@@ -138,17 +136,19 @@ it('tagged template expression', () => {
     );
 });
 
-it('external dependency', () => {
-    const result = run(
-        stripIndents`
-        import style from 'styles/a/b/style.css';
-        `,
-        {
-            readFileSync: () => 'a { }',
+it.only('external dependency', () => {
+    const result = run({
+        source: stripIndents`import style from 'styles/a/b/style.css';`,
+        options: {
             postcss: true,
             externalDependencies: ['styles/**/*.css'],
         },
-    );
+        createOptions: {
+            readFile: () => 'a { }',
+            globFiles: () => ['styles/a/1.css', 'styles/b/2.css'],
+            mtimeFile: () => 0,
+        },
+    });
     console.log('result', result);
     // expect(result).toEqual(
     //     `const style = "a { position: absolute; top: 50%; transform: translateY(-50%) }";`,
