@@ -64,3 +64,10 @@ var style2 = css`
     /* style3.css content */
 `;
 ```
+
+### Development
+
+```sh
+cd webpack-watch-experiment
+npx webpack --watch
+```
