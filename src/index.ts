@@ -47,13 +47,13 @@ function babelPluginPostcss(
             ? options.test
             : (file: string): boolean => (options.test as RegExp).test(file);
     let localCssImportSpecifier: Node.Identifier | undefined;
-    if (options.externalDependencies) {
-        const files = globFiles(options.externalDependencies);
-        for (const file of files) {
-            addExternalDependency(file);
-            cache.invalidate(() => mtimeFile(file));
-        }
-    }
+    // if (options.externalDependencies) {
+    //     const files = globFiles(options.externalDependencies);
+    //     for (const file of files) {
+    //         addExternalDependency(file);
+    //         cache.invalidate(() => mtimeFile(file));
+    //     }
+    // }
 
     function importDeclarationExit(path: NodePath<Node.ImportDeclaration>, state: any) {
         const filepath = resolve(

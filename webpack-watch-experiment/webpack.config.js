@@ -3,6 +3,10 @@ const WatchExternalFilesPlugin = require('webpack-watch-external-files-plugin');
 
 module.exports = {
     entry: path.resolve(__dirname, './index.js'),
+    watch: true,
+    externalsPresets: {
+        node: true,
+    },
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'bundle.js',
@@ -16,18 +20,15 @@ module.exports = {
                 use: 'babel-loader',
                 exclude: /node_modules/,
             },
-            // {
-            //     test: /\.css$/,
-            //     use: ['css-loader', 'postcss-loader'],
-            // },
         ],
     },
     resolve: {
         extensions: ['.js', '.jsx'],
     },
     plugins: [
-        new WatchExternalFilesPlugin({
-            files: ['style.css'],
-        }),
+        // new filewatcherPlugin({ watchFileRegex: ['webpack-watch-experiment/*.css'] }),
+        // new WatchExternalFilesPlugin({
+        //     files: ['style.css'],
+        // }),
     ],
 };

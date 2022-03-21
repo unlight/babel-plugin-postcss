@@ -1,13 +1,15 @@
+const { default: babelPluginPostcss } = require(__dirname + '/../src');
+
 module.exports = {
     presets: [],
     plugins: [
         [
-            'babel-plugin-postcss',
+            babelPluginPostcss,
             {
                 test: /\.css$/,
                 postcss: true,
                 tagged: ['css', 'lit-element'],
-                externalDependencies: ['style.css'],
+                externalDependencies: ['webpack-watch-experiment/style.css'],
             },
         ],
     ],

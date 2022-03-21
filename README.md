@@ -68,6 +68,5 @@ var style2 = css`
 ### Development
 
 ```sh
-cd webpack-watch-experiment
-npx webpack --watch
+node -r ts-node/register/transpile-only node_modules/webpack/bin/webpack.js --config ./webpack-watch-experiment/webpack.config.js
 ```
