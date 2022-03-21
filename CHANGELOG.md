@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/unlight/babel-plugin-postcss/compare/v1.0.1...v1.1.0) (2020-12-31)
+
+
+### Features
+
+* use .css as default extension for test option ([cab0cfb](https://github.com/unlight/babel-plugin-postcss/commit/cab0cfbacdfd8f568c387b57bebf9cd95c13c6da))
+
 # 1.0.0 (2020-02-11)
 
 

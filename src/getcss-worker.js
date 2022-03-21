@@ -10,7 +10,7 @@ module.exports = function getCssWorker(connection) {
         return processor.then(({ plugins, options }) => {
             return postcss(plugins)
                 .process(input, { from })
-                .then((result) => result.css);
+                .then(result => result.css);
         });
     };
 };
