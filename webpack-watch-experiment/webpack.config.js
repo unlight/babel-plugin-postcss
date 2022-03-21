@@ -1,4 +1,5 @@
 const path = require('path');
+const WatchExternalFilesPlugin = require('webpack-watch-external-files-plugin');
 
 module.exports = {
     entry: path.resolve(__dirname, './index.js'),
@@ -24,4 +25,9 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.jsx'],
     },
+    plugins: [
+        new WatchExternalFilesPlugin({
+            files: ['style.css'],
+        }),
+    ],
 };

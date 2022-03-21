@@ -7,6 +7,7 @@ module.exports = {
                 test: /\.css$/,
                 postcss: true,
                 tagged: ['css', 'lit-element'],
+                externalDependencies: ['style.css'],
             },
         ],
     ],
